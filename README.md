@@ -1,6 +1,6 @@
 # Writing Tests, the DataMade Way
 
-These are the principles, procedure and patterns that guide test writing at DataMade. Looking for something a little more didactic? [Skip to the tutorials](#guides).
+These are the principles, procedure and patterns that guide test writing at DataMade. Looking for something a little more didactic? [Skip to the tutorials](#tutorials).
 
 ## Testing principles
 
