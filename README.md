@@ -58,6 +58,7 @@ In the event that a test fails, unless the functionality of the method has mater
   * Testing Flask applications
   * Testing Django applications
 * [Front-end testing](/intro-to-javascript-testing.md)
+  * The right style
   * `jshint`
   * `jasmine`
 
