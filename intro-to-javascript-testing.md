@@ -20,11 +20,11 @@ An impeccable style guide, however, does not prevent human error. Every coder ha
 
 [`jshint`](http://jshint.com/about/) can be the hero in these stories. `jshint` analyzes JavaScript line-by-line and reports typos and common bug-causing mistakes.  
 
-Easily integrate `jshint` into your workflow, using one of three strategies:
+Easily integrate `jshint` into your workflow using one of three strategies:
 
 * Spotcheck code! Copy-and-paste select lines of potentially error-raising JS in the [`jshint` online console](http://jshint.com/). 
-* Enable `jshint` as a constant, nagging reminder of JS best practices. Add a JSHint plugin to your preferred code editor. At DataMade, many of us start on and continue using Sublime. For such Sublime user, install [JSHint Gutter](https://github.com/victorporof/Sublime-JSHint) through the Sublime package manager, and activate it by right clicking and selecting `JSHint --> Lint Code`. The results may be enlightening, but also exhausting: fix what needs fixing, and then clear the annotations with `CMD + esc`.
-* 
+* Enable `jshint` as a constant, nagging reminder of JS best practices: add a JSHint plugin to your preferred code editor. At DataMade, many of us start on and continue using Sublime. For those Sublime users, install [JSHint Gutter](https://github.com/victorporof/Sublime-JSHint) through the Sublime package manager, and activate it by right clicking and selecting `JSHint --> Lint Code`. The results may be enlightening, but also exhausting: fix what needs fixing, and then clear the annotations with `CMD + esc`.
+* Install the `jshint` command line interface, and integrate it with the regular running of your test suite (e.g., on Travis, in the [`setup.cfg` for Python apps](/intro-to-python-testing.md#configure-pytest-and-coordinate-additional-utilities)). 
 
 
 ## jasmine
