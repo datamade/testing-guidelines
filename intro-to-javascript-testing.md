@@ -1,8 +1,8 @@
 # Intro to JavaScript Testing
 
 * [The right style](#style)
-* [jshint](#jshint)
-* [jasmine](#jasmine)
+* [Test your syntax with jshint](#jshint)
+* [Test your logic with jasmine](#jasmine)
 
 ## The right style
 
@@ -27,7 +27,7 @@ Easily integrate `jshint` into your workflow using one of three strategies:
 * Install the `jshint` [command line interface](http://jshint.com/docs/cli/), and integrate it with the regular running of your test suite. Run `npm install -g jshint` to install JSHint globally. Then, in terminal, tell JSHint to lint your files. 
 
 The `jshint` cli has several options. Most simply, the `jshint` command accepts a specific file as a parameter:
- 
+
 ``` bash
 # Inspect this JS file!
 jshint my_unique_app/static/js/custom.js
@@ -66,5 +66,77 @@ script:
 ``` 
 
 ## jasmine
+
+The right style and perfect syntax make for clean, readable, debuggable JavaScipt. Yet, testing JS functionality requires something distinct. For this, we recommend [Jasmine](https://jasmine.github.io/2.0/introduction.html), a testing framework for behavior-driven development. 
+
+### Python integration
+
+Jasmine [plays nicely with Django and Flask apps](https://jasmine.github.io/setup/python.html). In the virtualenv of your app, install Jasmine and initialize a project:
+
+```
+# Install
+pip install jasmine
+
+# Initialize a project
+jasmine-install
+```
+
+`jasmine-install` creates a `spec` repo, where all testing specs and the configuration file (i.e., `jasmine.yml`) live. Before writing and running tests, tell Jasmine where to find relevant files by specifying, most importantly, the `src_files` and `src_dir` attributes:
+
+```
+...
+
+src_files:
+  - js/*
+
+...
+
+src_dir: 'my_app/static'
+
+...
+```
+
+Then, in terminal, run:
+
+```bash
+jasmine
+```
+
+Visit `http://127.0.0.1:8888`, and view your test results.
+
+Of course, without any tests, you should see relatively sparse output, something along these lines: "finished in 0.008s No specs found". Let's change that by writing a test! Open a JS file, and create a simple function – but not within `$(document).ready`. Why? `$(document).ready` [hides the functions inside a closure](http://bittersweetryan.github.io/jasmine-presentation/#slide-17).
+
+```javascript
+function makeTheTruth() {
+    return true;
+};
+```
+
+Then, make a spec file:
+
+```bash
+touch spec/javascripts/custom_spec.js
+```
+
+Open the newly created spec file, and add a test:
+
+```javascript
+describe("Test custom.js", function() {
+  it("returns true", function () {
+      var result = makeTheTruth();
+      expect(result).toBe(true);
+  });
+});
+```
+
+Reload `http://127.0.0.1:8888`, and the browser should show the number of tests and the number of failures: "finished in 0.007s 1 spec, 0 failures". 
+
+### Resources to consider for advanced integrated testing
+
+At DataMade, we are actively trying to improve our testing protocols. We hope to consider more robust ways of Jasmine integration with our python apps, as suggested by these sources:
+
+* [django-jasmine](https://github.com/jakeharding/django-jasmine)
+* [django.js for Jasmine views](http://djangojs.readthedocs.io/en/latest/test.html)
+
 
 

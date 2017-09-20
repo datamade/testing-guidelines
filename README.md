@@ -59,8 +59,8 @@ In the event that a test fails, unless the functionality of the method has mater
   * Testing Django applications
 * [Front-end testing](/intro-to-javascript-testing.md)
   * The right style
-  * `jshint`
-  * `jasmine`
+  * Test your syntax with `jshint`
+  * Test your logic with `jasmine`
 
 ## Examples
 
