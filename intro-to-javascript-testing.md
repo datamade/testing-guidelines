@@ -24,8 +24,46 @@ Easily integrate `jshint` into your workflow using one of three strategies:
 
 * Spotcheck code! Copy-and-paste select lines of potentially error-raising JS in the [`jshint` online console](http://jshint.com/). 
 * Enable `jshint` as a constant, nagging reminder of JS best practices: add a JSHint plugin to your preferred code editor. At DataMade, many of us start on and continue using Sublime. For those Sublime users, install [JSHint Gutter](https://github.com/victorporof/Sublime-JSHint) through the Sublime package manager, and activate it by right clicking and selecting `JSHint --> Lint Code`. The results may be enlightening, but also exhausting: fix what needs fixing, and then clear the annotations with `CMD + esc`.
-* Install the `jshint` command line interface, and integrate it with the regular running of your test suite (e.g., on Travis, in the [`setup.cfg` for Python apps](/intro-to-python-testing.md#configure-pytest-and-coordinate-additional-utilities)). 
+* Install the `jshint` [command line interface](http://jshint.com/docs/cli/), and integrate it with the regular running of your test suite. Run `npm install -g jshint` to install JSHint globally. Then, in terminal, tell JSHint to lint your files. 
 
+The `jshint` cli has several options. Most simply, the `jshint` command accepts a specific file as a parameter:
+ 
+``` bash
+# Inspect this JS file!
+jshint my_unique_app/static/js/custom.js
+
+# Discouraging output...
+my_unique_app/static/js/custom.js: line 14, col 51, Missing semicolon.
+my_unique_app/static/js/custom.js: line 18, col 48, Missing semicolon.
+my_unique_app/static/js/custom.js: line 52, col 34, Missing semicolon.
+
+3 errors
+```
+
+Alternatively, JSHint can recursively discover all JS files in a directory and return a report: `jshint .` The results, in this case, may not be useful, since JSHint lints third-party libraries, too. For greater precision, add a configuration file in the root of your app, called `.jshintignore`. Here, tell JSHint to ignore, let's say, the directory where you store external libraries.
+
+```
+my_unique_app/static/js/lib/*
+```
+
+The JSHint cli allows for automated testing with Travis. Include in your `.travis.yml` file instructions for installing `jshint` and directive(s) for running the linter:
+
+```
+...
+
+install:
+- pip install --upgrade pip
+- pip install --upgrade -r requirements.txt
+- npm install -g jshint
+
+...
+
+script: 
+- pytest tests
+- jshint my_unique_app/static/js/custom.js
+
+...
+``` 
 
 ## jasmine
 
