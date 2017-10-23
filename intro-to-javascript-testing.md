@@ -1,16 +1,14 @@
 # Intro to JavaScript Testing
 
-* [The right style](#style)
+* [The right style](#the-right-style)
 * [Test your syntax with jshint](#jshint)
 * [Test your logic with jasmine](#jasmine)
 
 ## The right style
 
-JavaScript, as a language itself, does not have too many opinions. Functional, reliable, "correct" JS comes in a variety of colors and shapes: in fact, the number of ways to [declare a function](https://www.bryanbraun.com/2014/11/27/every-possible-way-to-define-a-javascript-function/) reaches double digits.  
+JavaScript, as a language itself, does not have too many opinions. Functional, reliable, error-free JS comes in a variety of colors and shapes: in fact, the number of ways to [declare a function](https://www.bryanbraun.com/2014/11/27/every-possible-way-to-define-a-javascript-function/) reaches double digits. The flexibility of JS can create headaches, inspire pure rage, and ruin an afternoon. 
 
-Its flexibility can cause confusion, headaches, and pure rage. JS invites hard-to-answer questions, like, "Am I doing this right?", "Am I doing this the best way possible?" – and the "right way" may encompass enough solutions to ruin an afternoon. 
-
-So, narrow your options! As you write code and tests-for-your-code, check your JS against a style guide. Consistent style makes code easier to test and debug, while also minimizing cross-browser errors – a considerable pain point in JS. 
+Narrow your options! As you write code and tests-for-your-code, check your JS against a style guide. Consistent style makes code easier to test and debug, while also minimizing cross-browser errors – a considerable pain point in JS. 
 
 At DataMade, we recommend [our fork of the Node.js style guide](https://github.com/datamade/node-style-guide), a simple overview of best JS practices identified by [Felix Geisendörfer](http://felixge.de/). The [Crockford conventions](http://javascript.crockford.com/code.html) nicely complement the Node.js style guide: in it, [Douglas Crockford](https://en.wikipedia.org/wiki/Douglas_Crockford) gives a no-nonsense discussion of how to write "publication quality" JavaScript. 
 
@@ -26,7 +24,7 @@ Easily integrate `jshint` into your workflow using one of three strategies:
 * Enable `jshint` as a constant, nagging reminder of JS best practices: add a JSHint plugin to your preferred code editor. At DataMade, many of us start on and continue using Sublime. For those Sublime users, install [JSHint Gutter](https://github.com/victorporof/Sublime-JSHint) through the Sublime package manager, and activate it by right clicking and selecting `JSHint --> Lint Code`. The results may be enlightening, but also exhausting: fix what needs fixing, and then clear the annotations with `CMD + esc`.
 * Install the `jshint` [command line interface](http://jshint.com/docs/cli/), and integrate it with the regular running of your test suite. Run `npm install -g jshint` to install JSHint globally. Then, in terminal, tell JSHint to lint your files. 
 
-The `jshint` cli has several options. Most simply, the `jshint` command accepts a specific file as a parameter:
+The `jshint` CLI has several options. Most simply, the `jshint` command accepts a specific file as a parameter:
 
 ``` bash
 # Inspect this JS file!
@@ -46,7 +44,19 @@ Alternatively, JSHint can recursively discover all JS files in a directory and r
 my_unique_app/static/js/lib/*
 ```
 
-The JSHint cli allows for automated testing with Travis. Include in your `.travis.yml` file instructions for installing `jshint` and directive(s) for running the linter:
+JSHint allows for finer configuration via a [`.jshintrc` file](http://jshint.com/docs/). This file contains a JSON object that activates JSHint options. For example, [bitwise](http://jshint.com/docs/options/#bitwise) raises an error if the code contains a bitwise operator, such as `|`. [eqeqeq](http://jshint.com/docs/options/#eqeqeq) raises an error if the code includes a less strict equality operator: `!=` or `==`:
+
+```
+{
+  "bitwise": true,
+  "eqeqeq": true
+  ...
+}
+```
+
+DataMade has [a standard `.jshintrc` template](/handy-files/.jshintrc) - use it to initiate testing with JSHint, and customize it to fit the needs of your project. 
+
+The JSHint CLI allows for automated testing with Travis. Include in your `.travis.yml` file instructions for installing `jshint` and directive(s) for running the linter:
 
 ```
 ...
