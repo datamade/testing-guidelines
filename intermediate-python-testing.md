@@ -218,7 +218,7 @@ To diagnose these unintended dependencies, run your tests in a random order with
 pip install pytest-randomly
 ```
 
-Then run your tests as normal and behold! They will be shuffled, and you will be kept honest.
+Then run your tests as normal and behold! They will be shuffled, and you will be kept honest. (Toggle random functionality with the `--randomly-dont-reorganize` flag if you need a run in sequential order.)
 
 If you define a fixture that creates a table or inserts data that you intend to alter in your test, **use the `function` scope** and write a finalizer.
 
