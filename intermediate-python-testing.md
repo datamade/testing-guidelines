@@ -3,6 +3,7 @@
 * [Fixtures](#fixtures)
 * [Parameterized fixtures](#parameterizing-fixtures)
 * [Database fixtures](#database-fixtures)
+  * [Scope, or How to avoid confusing dependencies between your tests](#scope-or-how-to-avoid-confusing-dependencies-between-your-tests)
 * [mock](#mock)
 
 ## Fixtures
