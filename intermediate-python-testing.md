@@ -204,7 +204,7 @@ def database(request):
 
 DataMaders: If you need to add extensions to your test database, see [the `database` fixture in `dedupe-service`](https://github.com/datamade/dedupe-service/blob/master/tests/conftest.py).
 
-### Scope, or How To Avoid Confusing Dependencies Between Your Tests
+### Scope, or How to avoid confusing dependencies between your tests
 
 Notice the scope keyword argument in the `fixture` decorator above. Scope determines how long the context your fixture creates, sticks around. In `pytest`, there are three options:
 

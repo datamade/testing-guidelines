@@ -53,6 +53,7 @@ In the event that a test fails, unless the functionality of the method has mater
   * Intro to fixtures
   * Parameterized fixtures
   * Database fixtures
+    * How to avoid confusing dependencies between your tests
   * mock
 * [`pytest` 301](/framework-specific-patterns.md)
   * Testing Flask applications
