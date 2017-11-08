@@ -204,25 +204,29 @@ def database(request):
 
 DataMaders: If you need to add extensions to your test database, see [the `database` fixture in `dedupe-service`](https://github.com/datamade/dedupe-service/blob/master/tests/conftest.py).
 
-The above example includes two new and crucial concepts. Notice the scope keyword argument in our `fixture` decorator. Scope determines how long the context your fixture creates, sticks around. In `pytest`, there are three options:
+### Scope, or How To Avoid Confusing Dependencies Between Your Tests
+
+Notice the scope keyword argument in the `fixture` decorator above. Scope determines how long the context your fixture creates, sticks around. In `pytest`, there are three options:
 
 * `session` – Fixture is run once for the entire test suite
 * `module` – Fixture is run once per test module
 * `function` – Fixture is run every time a test includes it
 
-Fixtures are function-scoped by default, but it would be silly to re-create a database for every test. Instead, use the `session` scope for fixtures that establish context that you aren’t going to change over the course of your testing, such as creating a database, initializing an application, or inserting immutable dummy data.
+**Fixtures are function-scoped by default.** You should use this default, unless you have a compelling reason. For example, it would be silly to re-create a database for every test. It is appropriate to use the `session` scope for fixtures that establish context **that you aren’t going to change** over the course of your testing, such as creating a database, initializing an application, or inserting immutable dummy data.
 
-Be cautious: Changes made to broadly scoped fixtures persist for all other tests in that session or module. This can lead to confusing circumstances where you are unsure whether your test is failing or the context was changed by a previous test. If you define a fixture that creates a table or inserts data that you intend to alter in your test, it’s better to use a narrower scope.
+Be cautious! Changes made to broadly scoped fixtures **persist for all other tests in that session or module.** This can lead to confusing circumstances where you are unsure whether your test is failing or the fixture context you expect was changed by a previous test. To diagnose these unintended dependencies, [run your tests in a random order](https://pypi.python.org/pypi/pytest-randomly).
 
-Calling narrowly scoped fixtures that create tables or insert data multiples times leads to a cluttered test database. This brings us to finalizers (see the `drop_database` definition in the example above). A finalizer is a method, defined within a fixture and decorated with `@request.addfinalizer`, that is run when that fixture falls out of scope. In effect, finalizers should undo your fixture. If you insert data, remove the data; if you create a table, delete the table; and so on.
+If you define a fixture that creates a table or inserts data that you intend to alter in your test, **use the `function` scope.** If a more broadly scoped fixture is unavoidable, **clean up any changes** made to the fixture context at the end of every test that uses it.
+
+Narrowly scoped fixtures will automatically clean up changes if you define a finalizer (see the `drop_database` definition in the example above). A finalizer is a method, defined within a fixture and decorated with `@request.addfinalizer`, that is run when that fixture falls out of scope. In effect, finalizers should undo your fixture. If you insert data, remove the data; if you create a table, delete the table; and so on.
 
 On the other hand, calling narrowly scoped fixtures multiple times can significantly slow your tests down, particularly if you’re conducting heavy database transactions. If you find yourself in this position, you have a few options.
 
-1. **Change your tests.** Use a `module` scope for your fixture and either call your fixture once per module, or undo changes to tables or data created by the fixture at the end of each test. This is not the most straightforward solution.
+1. **Change your tests.** Use a `module` scope for your fixture and undo changes to tables or data created by the fixture at the end of each test. This is not a straightforward solution and should be used sparingly.
 
-2. **Refactor your code.** Break apart methods that both query and update data into a query method and an update method that accepts the result of the query, then test the method that queries without worrying about altered data. This can be a time intensive solution.
+2. **Refactor your code.** Break apart methods that query and update data into a query method and an update method that accepts the result of the query, then test the method that queries without worrying about altered data. This can be a time-intensive solution.
 
-3. **Fake it.** If you are testing a method that accepts the result of a query, do you need to create a table, populate it with dummy data, and query it just so you can run the test? Probably not! Write a fixture that returns the results you need, or include them right in the test.
+3. **Mock it.** If you are testing a method that accepts the result of a query, do you need to create a table, populate it with dummy data, and query it just so you can run the test? Probably not! Read on for an introduction to testing with `mock`.
 
 ## mock
 
@@ -231,3 +235,5 @@ If a test must retrieve data from an API endpoint before processing that data, i
 When a method or object is mocked, it is replaced by `Mock` object. This object records whether and how the patched method or object is called rather than executing the underlying code. To return to our example, you can mock your data retrieval method and test that it is called with the arguments you expect without ever touching the API.
 
 For more on `mock`, see [the quickstart](https://docs.python.org/3/library/unittest.mock.html#quick-guide) in the docs and [this excellent tutorial](https://www.toptal.com/python/an-introduction-to-mocking-in-python).
+
+At DataMade, we like [`pytest-mock`](https://github.com/pytest-dev/pytest-mock/), a `pytest` extension that exposes the `mock` API to your tests with the `mocker` fixture.
