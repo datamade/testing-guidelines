@@ -202,7 +202,7 @@ DataMaders: If you need to add extensions to your test database, see [the `datab
 
 ### Scope, or How to avoid confusing dependencies between your tests
 
-Notice the scope keyword argument in the `fixture` decorator above. Scope determines how long the context your fixture creates, sticks around. In `pytest`, there are three options:
+Notice the scope keyword argument in the `fixture` decorator above. Scope determines the lifespan of the context created by a fixture. In `pytest`, there are three options:
 
 * `session` – Fixture is run once for the entire test suite
 * `module` – Fixture is run once per test module
@@ -218,11 +218,26 @@ To diagnose these unintended dependencies, run your tests in a random order with
 pip install pytest-randomly
 ```
 
-Then run your tests as normal and behold! They will be shuffled, and you will be kept honest. (Toggle random functionality with the `--randomly-dont-reorganize` flag if you need a run in sequential order.)
+Then run your tests as normal and behold! They will be shuffled by default, and you will be kept honest.
+
+If you need to run your tests in sequential order, toggle random functionality with the `--randomly-dont-reorganize` flag. If you need to run your tests in the same random order, say for debugging a tricky failure, grab the `--randomly-seed=X` value from the top of your last run –
+
+```
+============================================================= test session starts =============================================================
+platform darwin -- Python 3.5.2, pytest-3.2.1, py-1.4.34, pluggy-0.4.0 -- /Users/Hannah/.virtualenvs/dedupe/bin/python3.5
+cachedir: .cache
+Using --randomly-seed=1510172112
+```
+
+– and use it to run the tests again.
+
+```bash
+pytest --randomly-seed=1510172112
+```
 
 If you define a fixture that creates a table or inserts data that you intend to alter in your test, **use the `function` scope** and write a finalizer.
 
-A finalizer is a method, defined within a fixture and decorated with `@request.addfinalizer`, that is run when that fixture falls out of scope. In effect, finalizers should undo your fixture. If you insert data, remove the data; if you create a table, delete the table; and so on. Let's add a finalizer that drops the database to the `database` fixture from before.
+A finalizer is a method, defined within a fixture and decorated with `@request.addfinalizer`, that is run when that fixture falls out of scope. In effect, finalizers should undo your fixture. If you insert data, remove the data; if you create a table, delete the table; and so on. Let's add a finalizer to our `database` fixture.
 
 **`conftest.py`**
 
