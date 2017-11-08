@@ -196,11 +196,6 @@ def database(request):
     pg_user = DB_OPTS.get("username")
     pg_db = DB_OPTS["database"]
     init_postgresql_database(pg_user, pg_host, pg_port, pg_db)
-
-    @request.addfinalizer
-    def drop_database():
-        # Last arg is postgres version
-        drop_postgresql_database(pg_user, pg_host, pg_port, pg_db, 9.6)
 ```
 
 DataMaders: If you need to add extensions to your test database, see [the `database` fixture in `dedupe-service`](https://github.com/datamade/dedupe-service/blob/master/tests/conftest.py).
@@ -213,21 +208,39 @@ Notice the scope keyword argument in the `fixture` decorator above. Scope determ
 * `module` – Fixture is run once per test module
 * `function` – Fixture is run every time a test includes it
 
-**Fixtures are function-scoped by default.** You should use this default, unless you have a compelling reason. For example, it would be silly to re-create a database for every test. It is appropriate to use the `session` scope for fixtures that establish context **that you aren’t going to change** over the course of your testing, such as creating a database, initializing an application, or inserting immutable dummy data.
+**Fixtures are function-scoped by default.** You should use this default unless you have a compelling reason. For example, it would be silly to re-create a database for every test. It is appropriate to use the `session` scope for fixtures that establish context that you aren’t going to change over the course of your testing, such as creating a database, initializing an application, or inserting immutable dummy data.
 
-Be cautious! Changes made to broadly scoped fixtures **persist for all other tests in that session or module.** This can lead to confusing circumstances where you are unsure whether your test is failing or the fixture context you expect was changed by a previous test. To diagnose these unintended dependencies, [run your tests in a random order](https://pypi.python.org/pypi/pytest-randomly).
+**Be cautious!** Changes made to broadly scoped fixtures persist for all other tests in that session or module. This can lead to confusing circumstances where you are unsure whether your test is failing or the fixture context you expect was changed by a previous test.
 
-If you define a fixture that creates a table or inserts data that you intend to alter in your test, **use the `function` scope.** If a more broadly scoped fixture is unavoidable, **clean up any changes** made to the fixture context at the end of every test that uses it.
+To diagnose these unintended dependencies, run your tests in a random order with [`pytest-randomly`](https://pypi.python.org/pypi/pytest-randomly). Simply:
 
-Narrowly scoped fixtures will automatically clean up changes if you define a finalizer (see the `drop_database` definition in the example above). A finalizer is a method, defined within a fixture and decorated with `@request.addfinalizer`, that is run when that fixture falls out of scope. In effect, finalizers should undo your fixture. If you insert data, remove the data; if you create a table, delete the table; and so on.
+```bash
+pip install pytest-randomly
+```
 
-On the other hand, calling narrowly scoped fixtures multiple times can significantly slow your tests down, particularly if you’re conducting heavy database transactions. If you find yourself in this position, you have a few options.
+Then run your tests as normal and behold! They will be shuffled, and you will be kept honest.
 
-1. **Change your tests.** Use a `module` scope for your fixture and undo changes to tables or data created by the fixture at the end of each test. This is not a straightforward solution and should be used sparingly.
+If you define a fixture that creates a table or inserts data that you intend to alter in your test, **use the `function` scope** and write a finalizer.
 
-2. **Refactor your code.** Break apart methods that query and update data into a query method and an update method that accepts the result of the query, then test the method that queries without worrying about altered data. This can be a time-intensive solution.
+A finalizer is a method, defined within a fixture and decorated with `@request.addfinalizer`, that is run when that fixture falls out of scope. In effect, finalizers should undo your fixture. If you insert data, remove the data; if you create a table, delete the table; and so on. Let's add a finalizer that drops the database to the `database` fixture from before.
 
-3. **Mock it.** If you are testing a method that accepts the result of a query, do you need to create a table, populate it with dummy data, and query it just so you can run the test? Probably not! Read on for an introduction to testing with `mock`.
+**`conftest.py`**
+
+```python
+@pytest.fixture(scope='session')
+def database(request):
+
+    # define fixture
+
+    @request.addfinalizer
+    def drop_database():
+        # Last arg is postgres version
+        drop_postgresql_database(pg_user, pg_host, pg_port, pg_db, 9.6)
+```
+
+If a more broadly scoped fixture is unavoidable, **clean up any changes** made to the fixture context at the end of every test that uses it.
+
+Even better, reconsider whether tests need alter the database at all. If you are testing a method that accepts the result of a query, do you need to create a table, populate it with dummy data, and query it just so you can run the test? Probably not! Read on for an introduction to testing with `mock`.
 
 ## mock
 
