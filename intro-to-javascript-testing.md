@@ -3,6 +3,7 @@
 * [The right style](#the-right-style)
 * [Test your syntax with jshint](#jshint)
 * [Test your logic with jasmine](#jasmine)
+* [Friendly reminders](#friendly-reminders)
 
 ## The right style
 
@@ -148,5 +149,10 @@ At DataMade, we are actively trying to improve our testing protocols. We hope to
 * [django-jasmine](https://github.com/jakeharding/django-jasmine)
 * [django.js for Jasmine views](http://djangojs.readthedocs.io/en/latest/test.html)
 
+## Friendly reminders
 
+DataMade has a long history of writing JavaScript - indeed, a history that pre-dates the creation of these guidelines. Below describes some our of habits and the ways to change them.
 
+Do not close function declarations with semicolons. Our preferred style guide does not recommend it, and JSHint complains about it.
+
+Be cautious of using Django filters in JavaScript. Periodically, we call view/context variables in JavaScript files - an entirely common practice (e.g., "{{ my_context_variable_made_avaliable_in_the_template }}"). However, such a practice can lead to troubling JS when we (1) do not stringify the variable, and (2) call a Django filter on the JS side (e.g., {{ variable|safe }}). It is safer to convert variables to JSON on the python side (`json.dumps`) and then parse them on the JS side (`JSON.parse`). With that said, `escapejs` can save the day, when available.  
