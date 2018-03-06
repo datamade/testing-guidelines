@@ -45,9 +45,23 @@ Alternatively, JSHint can recursively discover all JS files in a directory and r
 my_unique_app/static/js/lib/*
 ```
 
-You can configure the rules JSHint uses to lint your code via a [`.jshintrc` file](http://jshint.com/docs/). This file contains a JSON object that activates JSHint options.
+You can configure the rules JSHint uses to lint your code via a [`.jshintrc` file](http://jshint.com/docs/). This file contains a JSON object that activates JSHint options. DataMade has [a standard `.jshintrc` template](https://github.com/datamade/node-style-guide/blob/master/.jshintrc). Use it to initiate testing with JSHint, and [customize it](http://jshint.com/docs/options/) to fit the needs of your project.
 
-DataMade has [a standard `.jshintrc` template](https://github.com/datamade/node-style-guide/blob/master/.jshintrc). Use it to initiate testing with JSHint, and [customize it](http://jshint.com/docs/options/) to fit the needs of your project.
+If you know a discrete portion of your code is not `jshint` compliant, but you want to leave your config in tact for the rest, you can tell `jshint` to ignore a line or code block using the `ignore` directive, like so:
+
+```javascript
+// Ignore a line.
+console.log('please leave me be!'); // jshint ignore:line
+
+// Ignore a code block.
+/* jshint ignore:start */
+function rulebreaker(i) {
+    alert(i);
+}
+/* jshint ignore:end */
+```
+
+Note that this maneuver should _not_ be used just to get the tests to pass, but rather when there is not a better alternative. For example, JSHint complains when you leave a `console.log` in your code, but there are legitimate use cases for logging to the console in production, as in Councilmatic, where [we log the OCD ID of the entity being viewed](https://github.com/datamade/django-councilmatic/blob/5cc8ae50e8b0cf305afae563dd8deb29731204e7/councilmatic_core/templates/councilmatic_core/person.html#L232).
 
 The JSHint CLI allows for automated testing with Travis. Include in your `.travis.yml` file instructions for installing `jshint` and directive(s) for running the linter:
 
