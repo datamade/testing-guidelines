@@ -20,6 +20,10 @@ Create a tests directory at root of your main directory:
 
 Within the tests directory, add the following files:
 
+* **`__init__.py`**
+
+  An empty init file to transform your tests directory into a tests module, so imports (i.e., `import from .test_config`) work correctly.
+
 * **`test_config.py`**
 
   A configuration file that contains essential environment variables, i.e., INSTALLED_APPS, DATABASES, etc. (Careful! Do not put any secret data in here.)
@@ -50,7 +54,7 @@ Many DataMade projects use flake8 to enforce consistent and standard style patte
 
 Place a `setup.cfg` file in the root of your main directory. At the top, add a section for pytest: this tells your application to assign testing options (as they would appear in `pytest-ini`, i.e., the initialization file for `pytest`).
 
-Then, add parameters for testing setup. The below example, take from [Dedupe service](https://github.com/datamade/dedupe-service/blob/master/setup.cfg), includes precise options for flake8 + pytest integration. 
+Then, add parameters for testing setup. The below example, take from [Dedupe service](https://github.com/datamade/dedupe-service/blob/master/setup.cfg), includes precise options for flake8 + pytest integration.
 
 ```cfg
 [tool:pytest]
@@ -94,7 +98,7 @@ Executing the `pytest` framework is easy. It takes one command. Go to the root o
 pytest
 ```
 
-Pytest discovers all test modules, executes them, and prints the results to terminal. 
+Pytest discovers all test modules, executes them, and prints the results to terminal.
 
 You can hone in on particular tests, too. As suggested above, you should have a `tests` directory with individual files (i.e., test modules) or app-specific repositories. Indicate the particular module or repo, and pytest will only execute those tests:
 
