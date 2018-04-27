@@ -58,6 +58,11 @@ In the event that a test fails, unless the functionality of the method has mater
 * [`pytest` 301](/framework-specific-patterns.md)
   * Testing Flask applications
   * Testing Django applications
+    * Setup
+    * Interacting with the database
+    * Transactional context
+    * Model object fixtures
+    * Management commands
 * [Front-end testing](/intro-to-javascript-testing.md)
   * The right style
   * Test your syntax with `jshint`

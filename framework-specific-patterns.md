@@ -2,6 +2,11 @@
 
 * [Testing Flask applications](#flask)
 * [Testing Django applications](#django)
+  * [Setup](#setup)
+  * [Interacting with the database](#interacting-with-the-database)
+  * [Transactional context](#transactional-context)
+  * [Model object fixtures](#model-object-fixtures)
+  * [Management commands](#management-commands)
 
 ## Flask
 
@@ -182,6 +187,7 @@ from django.urls import reverse
 
 from my_app.models import Cat
 
+
 @pytest.mark.django_db
 def test_cat_detail(client):
     # Create a new cat
@@ -197,11 +203,11 @@ def test_cat_detail(client):
 
 ### Transactional context
 
-But wait! Doesn't creating a new `Cat` object without cleaning it up violate our standard to return test context to its original state, every time? Nope! `pytest-django` runs all database operations in a transaction, then rolls them back at the end of the test.
+But wait! Doesn't creating a new `Cat` object without cleaning it up violate [our standard to return test context to its original state](/intermediate-python-testing.md#scope-or-how-to-avoid-confusing-dependencies-between-your-tests), every time? Nope! `pytest-django` runs all database operations in a transaction, then rolls them back at the end of the test.
 
-It is important to note that there are two, distinct types of transactional context. The default **does not insert any data into the database**. Objects you create in the ORM will be accessible via the ORM, but if the code you are testing runs raw SQL against the database, your new object will not be there.
+It is important to note that there are two, distinct types of transactional context in `pytest-django` world. The default **does not insert any data into the database**. Objects you create in the ORM will be accessible via the ORM, but if the code you are testing runs raw SQL against the database, your new object/s will not be there.
 
-If the code under test queries the database directly, you can configure Django to push new data to the database with the `transaction` argument.
+If the code you are testing queries the database directly, you can configure Django to push new data to the database with the `transaction` argument.
 
 ```python
 @pytest.mark.django_db(transaction=True)
@@ -218,7 +224,7 @@ If you're interested in the mechanics of Django's transactional test context, ou
 
 #### Special case: Fixtures
 
-If you need to push data to the database in a fixture, use the `django_db` mark as above, and include the `transactional_db` fixture in your fixture.
+If you need to push data to the database in a fixture, use the `django_db` mark as above, and include the `transactional_db` fixture in your fixture. (This fixture comes from `pytest-django`.)
 
 ```python
 @pytest.mark.django_db(transaction=True)
@@ -230,17 +236,43 @@ def a_fixture(transactional_db):
 
 The pattern used above is great for one test, but creating the same model instance over and over becomes wearisome, fast, especially when your models have many fields to populate, and many of them don't need to change between tests. That's where fixtures come in.
 
-Parameterization is great if you have a standard set of test cases across all tests that use a fixture, but it's not so great if your test cases vary. Luckily, we can create a fixture that "accepts" parameters on a case-by-case basis by yielding a factory that accepts those parameters and uses them to create and return your slightly custom object.
-
-The pattern goes like this:
+In the most basic approach, you could define a fixture that yields a model object.
 
 **`conftest.py`**
 ```python
-import pytest
+@pytest.fixture
+@pytest.mark.django_db
+def cat():
+    return Cat.objects.create(name='Felix')
+```
 
-from your_app.models import Cat
+However, if you need to change an attribute of your object, you have to do it in the body of your test, which isn't so efficient.
 
+**`test_cat.py`**
+```python
+@pytest.mark.django_db
+def test_cat(cat):
+    cat.name = 'Thomas'
+    cat.save()
+```
 
+If you have a standard set of test cases, you could always [parameterize your fixture](/intermediate-python-testing.md#parameterizing-fixtures). This means each test that includes the fixture will run for each set of parameters.
+
+**`conftest.py`**
+```python
+colors = ['orange', 'black', 'calico']
+
+@pytest.mark.django_db
+@pytest.mark.fixture(params=colors)
+def cat(request):
+    # Tests that include this fixture will run for a Cat of each color
+    return Cat.objects.create(name='Felix', color=request.param)
+```
+
+If your test cases _aren't_ standard, though, you might want to write a fixture that "accepts parameters" on a case-by-case basis. The pattern goes like this:
+
+**`conftest.py`**
+```python
 @pytest.fixture
 @pytest.mark.django_db
 def cat():
@@ -259,9 +291,9 @@ def cat():
     return CatFactory()
 ```
 
-First, we define a factory class, `CatFactory`, with a `build` method that accepts unspecified `kwargs`. The `build` method defines standard dummy attributes, `cat_info`, for the model we'd like to build. It then `update`s the dummy data with any `kwargs` passed to the `build` method, and creates and returns the object.
+First, we define a factory class, `CatFactory`, with a `build` method that accepts unspecified `kwargs`. The `build` method defines standard dummy attributes, `cat_info`, for the model we'd like to build. It then `update`s the dummy data with any `kwargs` passed to the `build` method, and uses them to create and return a `Cat` object.
 
-Use the fixture like this.
+You use this brand of fixture like so:
 
 **`test_cat.py`**
 ```python
@@ -270,15 +302,10 @@ def test_cat(cat):
     custom_cat = cat.build(name='Darlene', favorite_food='chicken')  # Cat Darlene, loves chicken
 ```
 
-This becomes even more useful when your models have foreign keys. Rather than having to create an instance of the model to populate the foreign key, you can just include the model object fixture and call its build method.
+This becomes even more useful when your models have foreign keys to other models. Rather than having to create an instance of the foreign key model, you can just include the foreign key model object fixture and call its build method.
 
 **`conftest.py`**
 ```python
-import pytest
-
-from your_app.models import Cat, Owner
-
-
 @pytest.fixture
 @pytest.mark.django_db
 def owner():
@@ -313,8 +340,6 @@ def cat(owner):
 
     return CatFactory()
 ```
-
-# TO-DO: Expound real quick on MGMT commands.
 
 ### Management commands
 

@@ -208,13 +208,9 @@ Notice the scope keyword argument in the `fixture` decorator above. Scope determ
 * `module` – Fixture is run once per test module
 * `function` – Fixture is run every time a test includes it
 
-#### Fixtures are function-scoped by default.
+Fixtures are function-scoped by default. You should use this default unless you have a compelling reason. For example, it would be silly to re-create a database for every test. It is appropriate to use the `session` scope for fixtures that establish context that you aren’t going to change over the course of your testing, such as creating a database, initializing an application, or inserting _immutable_ dummy data.
 
-You should use this default unless you have a compelling reason. For example, it would be silly to re-create a database for every test. It is appropriate to use the `session` scope for fixtures that establish context that you aren’t going to change over the course of your testing, such as creating a database, initializing an application, or inserting _immutable_ dummy data.
-
-#### Be cautious!
-
-Changes made to broadly scoped fixtures persist for all other tests in that session or module. This can lead to confusing circumstances where you are unsure whether your test is failing or the fixture context you expect was changed by a previous test.
+**Be cautious!** Changes made to broadly scoped fixtures persist for all other tests in that session or module. This can lead to confusing circumstances where you are unsure whether your test is failing or the fixture context you expect was changed by a previous test.
 
 To diagnose these unintended dependencies, you can run your tests in a random order with [`pytest-randomly`](https://pypi.python.org/pypi/pytest-randomly). Simply:
 
@@ -353,7 +349,7 @@ mocked_class.this_method.side_effect = AttributeError
 mocked_class.that_method.return_value = 'nyan nyan nyan'
 ```
 
-<sup><strong>Note:</strong> Spec'ing means your mock object shares attributes and methods with your class. If you try to access an attribute or call a method incorrectly, i.e., without positional arguments, on a spec'ed mock object, it will raise an exception. This is in contrast to an unspec'ed mock object, which will let  you access any attribute or call any function you want without complaint. Spec'ing ensures your tests align with the API in your code base and stay in line as it changes (because your mock objects will break if they fall out of date).</sup>
+<sup>**Note:** Spec'ing means your mock object shares attributes and methods with your class. If you try to access an attribute or call a method incorrectly, i.e., without positional arguments, on a spec'ed mock object, it will raise an exception. This is in contrast to an unspec'ed mock object, which will let  you access any attribute or call any function you want without complaint. Spec'ing ensures your tests align with the API in your code base and stay in line as it changes (because your mock objects will break if they fall out of date).</sup>
 
 Then, you need to patch the class you'd like to mock, and set its `return_value` to the `MagicMock` we just made.
 
