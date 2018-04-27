@@ -214,6 +214,8 @@ def test_that_pushes_data_to_the_database():
         ''')
 ```
 
+If you're interested in the mechanics of Django's transactional test context, our very own Jean Cochrane [wrote an excellent blog post](https://jeancochrane.com/blog/django-test-transactions) that's well worth your time!
+
 #### Special case: Fixtures
 
 If you need to push data to the database in a fixture, use the `django_db` mark as above, and include the `transactional_db` fixture in your fixture.
@@ -224,13 +226,95 @@ def a_fixture(transactional_db):
     # data is pushed to the database
 ```
 
-If you're interested in the mechanics of Django's transactional test context, our very own Jean Cochrane [wrote an excellent blog post](https://jeancochrane.com/blog/django-test-transactions) that's well worth your time!
-
 ### Model object fixtures
 
-This pattern is great for one test, but creating the same model instance over and over becomes wearisome, fast, especially when your models have many fields to populate. That's where fixtures come in.
+The pattern used above is great for one test, but creating the same model instance over and over becomes wearisome, fast, especially when your models have many fields to populate, and many of them don't need to change between tests. That's where fixtures come in.
 
-# TO-DO: Expound real quick on fixtures & MGMT commands.
+Parameterization is great if you have a standard set of test cases across all tests that use a fixture, but it's not so great if your test cases vary. Luckily, we can create a fixture that "accepts" parameters on a case-by-case basis by yielding a factory that accepts those parameters and uses them to create and return your slightly custom object.
+
+The pattern goes like this:
+
+**`conftest.py`**
+```python
+import pytest
+
+from your_app.models import Cat
+
+
+@pytest.fixture
+@pytest.mark.django_db
+def cat():
+    class CatFactory():
+        def build(self, **kwargs):
+            cat_info = {
+                'name': 'Seymour',
+                'color': 'orange',
+                'favorite_food': 'tuna',
+            }
+
+            cat_info.update(kwargs)
+
+            return Cat.objects.create(**cat_info)
+
+    return CatFactory()
+```
+
+First, we define a factory class, `CatFactory`, with a `build` method that accepts unspecified `kwargs`. The `build` method defines standard dummy attributes, `cat_info`, for the model we'd like to build. It then `update`s the dummy data with any `kwargs` passed to the `build` method, and creates and returns the object.
+
+Use the fixture like this.
+
+**`test_cat.py`**
+```python
+def test_cat(cat):
+    basic_cat = cat.build()  # Cat Seymour, loves tuna
+    custom_cat = cat.build(name='Darlene', favorite_food='chicken')  # Cat Darlene, loves chicken
+```
+
+This becomes even more useful when your models have foreign keys. Rather than having to create an instance of the model to populate the foreign key, you can just include the model object fixture and call its build method.
+
+**`conftest.py`**
+```python
+import pytest
+
+from your_app.models import Cat, Owner
+
+
+@pytest.fixture
+@pytest.mark.django_db
+def owner():
+    class OwnerFactory():
+        def build(self, **kwargs):
+            owner_info = {
+                'name': 'Hannah',
+                'age': 26,
+            }
+
+            owner_info.update(kwargs)
+
+            return Owner.objects.create(**owner_info)
+
+    return OwnerFactory()
+
+@pytest.fixture
+@pytest.mark.django_db
+def cat(owner):
+    class CatFactory():
+        def build(self, **kwargs):
+            cat_info = {
+                'name': 'Seymour',
+                'color': 'orange',
+                'favorite_food': 'tuna',
+                'owner': owner.build(),
+            }
+
+            cat_info.update(kwargs)
+
+            return Cat.objects.create(**cat_info)
+
+    return CatFactory()
+```
+
+# TO-DO: Expound real quick on MGMT commands.
 
 ### Management commands
 
