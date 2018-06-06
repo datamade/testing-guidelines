@@ -99,9 +99,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'storages',
     ... YOUR APPS ...
-    'debug_toolbar',
     'django.contrib.postgres',
 ]
 
@@ -154,7 +152,7 @@ STATICFILES_DIRS = (
 )
 ```
 
-Then, tell Django where to find it:
+Then, tell Django where to find it by running this in the command line:
 
 ```bash
 export DJANGO_SETTINGS_MODULE=tests.test_config
