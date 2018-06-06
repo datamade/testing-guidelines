@@ -92,6 +92,12 @@ The `assert` statement appears ubiquitously in python tests: it determines if bo
 
 ## Commands to run the tests
 
+If you don't already have pytest installed, run:
+
+```bash
+pip install -U pytest
+```
+
 Executing the `pytest` framework is easy. It takes one command. Go to the root of your directory, and run:
 
 ```bash
