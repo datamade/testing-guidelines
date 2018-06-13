@@ -17,9 +17,7 @@ Vanilla Flask tests can quickly become a confusing jungle of context managers an
 To get started,
 
 ```bash
-
 pip install pytest-flask
-
 ```
 
 Add `pytest-flask` to your `requirements.txt` file.
@@ -152,10 +150,12 @@ STATICFILES_DIRS = (
 )
 ```
 
-Then, tell Django where to find it by running this in the command line:
+Then, tell Django where to find it in `setup.cfg`:
 
-```bash
-export DJANGO_SETTINGS_MODULE=tests.test_config
+**`setup.cfg`**
+```
+[pytest]
+DJANGO_SETTINGS_MODULE = tests.test_config
 ```
 
 ### Interacting with the database
