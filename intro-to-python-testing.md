@@ -12,7 +12,7 @@ DataMade uses the `pytest` framework for testing Python. `pytest` auto-discovers
 To install pytest, run:
 
 ```bash
-pip install -U pytest
+pip install pytest
 ```
 
 Create a tests directory at root of your main directory:
