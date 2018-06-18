@@ -49,6 +49,7 @@ In the event that a test fails, unless the functionality of the method has mater
   * Organizing tests
   * Configuring tests
   * Running tests
+  * A note on filepaths
 * [`pytest` 201](/intermediate-python-testing.md)
   * Intro to fixtures
   * Parameterized fixtures

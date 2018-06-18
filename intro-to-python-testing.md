@@ -4,6 +4,7 @@
 * [Configure `pytest` and coordinate additional utilities](#configure-pytest-and-coordinate-additional-utilities)
 * [Assert `True` == `True`](#assert-true--true)
 * [Commands to run the tests](#commands-to-run-the-tests)
+* [A note on filepaths](#a-note-on-filepaths)
 
 ## Directory structure
 
@@ -155,3 +156,44 @@ Did pytest not discover your tests? Check the names of your modules and test fun
 
 * Test modules should be labeled as `test_*.py` or `*_test.py`.
 * Test functions should start with `test_`.
+
+### A note on filepaths
+
+Relative filepaths may work in your local development environment, but they aren't so friendly to Travis or our deployment environment. Save yourself the failed build: If your application includes filepaths, create an absolute filepath using `os`.
+
+```python
+import os
+
+
+# Get the name of the directory your file lives in.
+file_directory = os.path.dirname(__file__)
+
+# Get the absolute path of the directory your file lives in.
+absolute_file_directory = os.path.abspath(file_directory)
+```
+
+You can use this absolute path to build out other filepaths as needed using `os.path.join`. Note that your filepath **will be relative to the file you build it in**, i.e., if you are in `project_dir/some_module/script.py`, then `absolute_file_directory` will be `/path/to/project_dir/some_module`.
+
+```python
+# Build absolute path to data in the same directory as the script.
+local_data = os.path.join(absolute_file_directory, 'local_data.csv')
+
+# Build absolute path to data in a directory adjacent to (e.g., up one level) the script directory.
+remote_data = os.path.join(absolute_file_directory, '..', 'another_directory', 'remote_data.json')
+```
+
+If you're building filepaths in a testing context, you can [include a fixture](intermediate-python-testing.md#fixtures) to return your project directory in `tests/conftest.py`, like this:
+
+```python
+@pytest.fixture
+def project_directory():
+    test_directory = os.path.abspath(os.path.dirname(__file__))
+    return os.path.join(test_directory, '..')
+```
+
+Then, as before, use that path to build filepaths in your tests.
+
+```python
+def test_some_file(project_directory):
+  some_file = os.path.join(project_directory, 'some_file.txt')
+```
