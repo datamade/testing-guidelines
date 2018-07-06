@@ -62,13 +62,15 @@ tests/test_blah.py::test_addition PASSED
 
 Success!
 
-Note: You may create additional `conftest.py` files with special fixtures in your topical subdirectories. Test modules within the subdirectory will then have access to both global and special fixtures. This a great way to stay organized in complex testing situations.
+<sup>**Note:** You may create additional `conftest.py` files with special fixtures in your topical subdirectories. Test modules within the subdirectory will then have access to both global and special fixtures. This a great way to stay organized in complex testing situations.</sup>
 
 ## Parameterizing fixtures
 
 Behavior-driven development hinges on the question, "How should my code behave, given a certain context?" In our math example, we only test one context: summing two positive integers. What if one or both integers is negative? What if they’re floats? What if they’re not numbers at all? 
 
-Lucky for us, the `pytest` framework can test multiple contexts with one fixture – testing sugar, known as parameterized fixtures. To parameterize your fixture, first create an iterable containing your test cases. Then, pass your iterable to the `params` keyword argument of the `fixture` decorator. Tests that include your fixture will now run once for every parameter.
+Lucky for us, the `pytest` framework can test multiple contexts with one fixture – testing sugar, known as parameterized fixtures. To parameterize your fixture, first create an iterable containing your test cases. Then, pass your iterable to the `params` keyword argument of the `fixture` decorator. Tests that include your fixture will now run once for every parameter. 
+
+<sup>**Note:** the below example uses [`pytest.raises` as a context manager](https://docs.pytest.org/en/latest/assert.html#assertions-about-expected-exceptions) to test the `TypeError` exception.</sup>
 
 **`conftest.py`**
 
@@ -137,7 +139,7 @@ tests/test_blah.py::test_addition[numbers5] PASSED
 
 Success times 6!
 
-Note: You can write cumulative fixtures by defining one fixture, then defining another fixture that includes (accepts as an argument) the first one.
+<sup>**Note:** You can write cumulative fixtures by defining one fixture, then defining another fixture that includes (accepts as an argument) the first one.</sup>
 
 ```python
 @pytest.fixture
