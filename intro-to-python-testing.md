@@ -7,7 +7,7 @@
 
 ## Directory structure
 
-DataMade uses the `pytest` framework for testing Python. `pytest` auto-discovers all test modules by recursing into test directories and searching for `test_*.py` and `*_test.py` files. This mode of test discovery allows for some flexibility in directory-structure design: the tests can reside within nested app directories or in a stand-alone directory at the root of the main repo. At DataMade, we prefer to the latter structure. Here’s how to get started.
+DataMade uses the `pytest` framework for testing Python. `pytest` auto-discovers all test modules by recursing into test directories and searching for `test_*.py` and `*_test.py` files. This mode of test discovery allows for some flexibility in directory-structure design: the tests can reside within nested app directories or in a stand-alone directory at the root of the main repo. At DataMade, we prefer the latter structure. Here’s how to get started.
 
 Create a tests directory at root of your main directory:
 
@@ -26,7 +26,7 @@ Within the tests directory, add the following files:
 
 * **`conftest.py`**
 
-  A file that defines fixtures, i.e., instances of objects or reusable behaviors (e.g., a function that sets up a test database)
+  A file that defines fixtures, i.e., instances of objects or reusable behaviors (e.g., [the LargeLots conftest file](https://github.com/datamade/large-lots/blob/master/tests/conftest.py) has fixtures that create instances of the Lot, ApplicationStep, and Address classes)
 
 * **`test_*.py`**
 
@@ -50,7 +50,7 @@ Many DataMade projects use flake8 to enforce consistent and standard style patte
 
 Place a `setup.cfg` file in the root of your main directory. At the top, add a section for pytest: this tells your application to assign testing options (as they would appear in `pytest-ini`, i.e., the initialization file for `pytest`).
 
-Then, add parameters for testing setup. The below example, take from [Dedupe service](https://github.com/datamade/dedupe-service/blob/master/setup.cfg), includes precise options for flake8 + pytest integration. 
+Then, add parameters for testing setup. The below example, taken from [Dedupe service](https://github.com/datamade/dedupe-service/blob/master/setup.cfg), includes precise options for flake8 + pytest integration. 
 
 ```cfg
 [tool:pytest]
