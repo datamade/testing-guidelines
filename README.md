@@ -31,11 +31,11 @@ Also note that it is only necessary to test your own code because languages and 
 
 **How do I write tests?**
 
-Practicing BDD means creating a "spec" for each feature prior to implementation. While some developers may prefer to spec on the fly or outside of a testing environment, it can also be useful to set up a test and outline the spec as a series of comments first. Development can then be done at the developer’s own pace – writing a piece of code or implementing the entire feature – then testing that it behaves as expected.
+Practicing BDD involves **creating a [technical specification](https://www.joelonsoftware.com/2000/10/03/painless-functional-specifications-part-2-whats-a-spec/) (or "spec") for each feature prior to implementation**. A spec can exist as a separate document, in the context of an issue, or in the comments of the code, outside or within a testing environment. Outlining a spec with tests in mind can help identify the goals of the code. Development can then be done at the developer’s own pace – writing a piece of code or implementing the entire feature – then testing that it behaves as expected.
 
-Whether or not you use tests to spec, document what you are testing in docstrings or comments, particularly where queries or clever assertions are involved.
+Whether or not you use tests to spec, **document what you are testing in docstrings or comments**, particularly where queries or clever assertions are involved.
 
-Tests should operate independently of the outside world, and of each other. Use fixtures to create reusable data, whether it’s in a database or available through the fixture itself. Ideally, all non-database fixtures should be scoped to the function level. Document where fixtures exceed this scope, and be sure your tests return those fixtures to their original state, where applicable. For instance, if your fixture refers to a database table and your test alters that table, revert your changes at the end of your test.
+Tests should operate independently of the outside world, and of each other. **Use fixtures to create reusable data**, whether it’s in a database or available through the fixture itself. Ideally, all non-database fixtures should be scoped to the function level. Document where fixtures exceed this scope, and be sure your tests return those fixtures to their original state, where applicable. For instance, if your fixture refers to a database table and your test alters that table, revert your changes at the end of your test.
 
 **When should I run tests?**
 
