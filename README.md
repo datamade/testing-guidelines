@@ -35,7 +35,7 @@ Practicing BDD involves **creating a [technical specification](https://www.joelo
 
 Whether or not you use tests to spec, **document what you are testing in docstrings or comments**, particularly where queries or clever assertions are involved.
 
-Tests should operate independently of the outside world, and of each other. **Use fixtures to create reusable data**, whether it’s in a database or available through the fixture itself. Ideally, all non-database fixtures should be scoped to the function level. Document where fixtures exceed this scope, and be sure your tests return those fixtures to their original state, where applicable. For instance, if your fixture refers to a database table and your test alters that table, revert your changes at the end of your test.
+Tests should operate independently of the outside world, and of each other. **Use fixtures to create reusable data**, whether it’s in a database or available through the fixture itself. Ideally, all fixtures should be scoped to the function level and your test environment should be automatically returned to its original state after each test. Where this is not possible, document where fixtures violate this expectation, and be sure your tests clean up after themselves. For instance, if you use a module-scoped database table fixture in a test that test alters said table, any alterations should be reverted at the end of the test.
 
 **When should I run tests?**
 
@@ -49,6 +49,7 @@ In the event that a test fails, unless the functionality of the method has mater
   * Organizing tests
   * Configuring tests
   * Running tests
+  * A note on filepaths
 * [`pytest` 201](/intermediate-python-testing.md)
   * Intro to fixtures
   * Parameterized fixtures
@@ -58,6 +59,11 @@ In the event that a test fails, unless the functionality of the method has mater
 * [`pytest` 301](/framework-specific-patterns.md)
   * Testing Flask applications
   * Testing Django applications
+    * Setup
+    * Interacting with the database
+    * Transactional context
+    * Model object fixtures
+    * Management commands
 * [Front-end testing](/intro-to-javascript-testing.md)
   * The right style
   * Test your syntax with `jshint`
@@ -65,7 +71,16 @@ In the event that a test fails, unless the functionality of the method has mater
 
 ## Examples
 
-* [`dedupe`](https://github.com/dedupeio/dedupe) – test functionality of DataMade's fuzzy matching library
+### Django
+
 * [`django-councilmatic`](https://github.com/datamade/django-councilmatic/blob/master/councilmatic_core/tests.py) – test all endpoints in a Councilmatic instance are valid
-* [`large-lots`](https://github.com/datamade/large-lots/tree/master/lots_admin/tests) - test Django management command in Large Lots sends notifications and updates the database accordingly
+* [`la-metro-councilmatic`](https://github.com/datamade/la-metro-councilmatic/tree/master/tests) - test assorted formatting and display behaviors in a custom Councilmatic instance
+* [`large-lots`](https://github.com/datamade/large-lots/tree/master/tests) - test a variety of functionality in a Django app, from form submission and validation, to distributed review tasks, to Django management commands
+
+### Flask
+
 * [`occrp`](https://github.com/datamade/occrp-timeline-tool/tree/master/tests) – test Flask form submission and page content rendering
+
+### Python libraries
+
+* [`dedupe`](https://github.com/dedupeio/dedupe) – test functionality of DataMade's fuzzy matching library

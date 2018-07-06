@@ -4,10 +4,17 @@
 * [Configure `pytest` and coordinate additional utilities](#configure-pytest-and-coordinate-additional-utilities)
 * [Assert `True` == `True`](#assert-true--true)
 * [Commands to run the tests](#commands-to-run-the-tests)
+* [A note on filepaths](#a-note-on-filepaths)
 
 ## Directory structure
 
 DataMade uses the `pytest` framework for testing Python. `pytest` auto-discovers all test modules by recursing into test directories and searching for `test_*.py` and `*_test.py` files. This mode of test discovery allows for some flexibility in directory-structure design: the tests can reside within nested app directories or in a stand-alone directory at the root of the main repo. At DataMade, we prefer the latter structure. Here’s how to get started.
+
+To install pytest, run:
+
+```bash
+pip install pytest
+```
 
 Create a tests directory at root of your main directory:
 
@@ -19,6 +26,10 @@ Create a tests directory at root of your main directory:
 ```
 
 Within the tests directory, add the following files:
+
+* **`__init__.py`**
+
+  An empty init file to transform your tests directory into a tests module, so imports (i.e., `import from .test_config`) work correctly.
 
 * **`test_config.py`**
 
@@ -44,13 +55,17 @@ Within the tests directory, add the following files:
 
 ## Configure `pytest` and coordinate additional utilities
 
-You may wish to include a `setup.cfg` file in your directory structure. This file provides a space for specifying configuration options and enabling integration of tools (testing and otherwise) – helpful, particularly, with flake8. (If you are new to testing and unfamiliar with flake8, then move ahead to the section on "Assert True is True." If not, then read on!)
+If you don't already have one, add a `setup.cfg` file to the root of your directory. This file provides a space for specifying configuration options and enabling integration of tools (testing and otherwise) – helpful, particularly, with flake8. (If you are new to testing and unfamiliar with flake8, then move ahead to the section on "Assert True is True." If not, then read on!)
 
 Many DataMade projects use flake8 to enforce consistent and standard style patterns in Python. Yet, remembering to run both the pytest and flake8 test suites before pushing a branch to Github requires a certain degree of testing heedfulness. A `setup.cfg` file helps reduce the number of things to remember.
 
-Place a `setup.cfg` file in the root of your main directory. At the top, add a section for pytest: this tells your application to assign testing options (as they would appear in `pytest-ini`, i.e., the initialization file for `pytest`).
+At the top of your `setup.cfg` file, add a section for pytest: this tells your application to assign testing options (as they would appear in `pytest.ini`, i.e., the initialization file for `pytest`).
 
+<<<<<<< HEAD
 Then, add parameters for testing setup. The below example, taken from [Dedupe service](https://github.com/datamade/dedupe-service/blob/master/setup.cfg), includes precise options for flake8 + pytest integration. 
+=======
+Then, add parameters for testing setup. The below example, take from [Dedupe service](https://github.com/datamade/dedupe-service/blob/master/setup.cfg), includes precise options for flake8 + pytest integration.
+>>>>>>> master
 
 ```cfg
 [tool:pytest]
@@ -94,7 +109,7 @@ Executing the `pytest` framework is easy. It takes one command. Go to the root o
 pytest
 ```
 
-Pytest discovers all test modules, executes them, and prints the results to terminal. 
+Pytest discovers all test modules, executes them, and prints the results to terminal.
 
 You can hone in on particular tests, too. As suggested above, you should have a `tests` directory with individual files (i.e., test modules) or app-specific repositories. Indicate the particular module or repo, and pytest will only execute those tests:
 
@@ -145,3 +160,44 @@ Did pytest not discover your tests? Check the names of your modules and test fun
 
 * Test modules should be labeled as `test_*.py` or `*_test.py`.
 * Test functions should start with `test_`.
+
+### A note on filepaths
+
+Relative filepaths may work in your local development environment, but they aren't so friendly to Travis or our deployment environment. Save yourself the failed build: If your application includes filepaths, create an absolute filepath using `os`.
+
+```python
+import os
+
+
+# Get the name of the directory your file lives in.
+file_directory = os.path.dirname(__file__)
+
+# Get the absolute path of the directory your file lives in.
+absolute_file_directory = os.path.abspath(file_directory)
+```
+
+You can use this absolute path to build out other filepaths as needed using `os.path.join`. Note that your filepath **will be relative to the file you build it in**, i.e., if you are in `project_dir/some_module/script.py`, then `absolute_file_directory` will be `/path/to/project_dir/some_module`.
+
+```python
+# Build absolute path to data in the same directory as the script.
+local_data = os.path.join(absolute_file_directory, 'local_data.csv')
+
+# Build absolute path to data in a directory adjacent to (e.g., up one level) the script directory.
+remote_data = os.path.join(absolute_file_directory, '..', 'another_directory', 'remote_data.json')
+```
+
+If you're building filepaths in a testing context, you can [include a fixture](intermediate-python-testing.md#fixtures) to return your project directory in `tests/conftest.py`, like this:
+
+```python
+@pytest.fixture
+def project_directory():
+    test_directory = os.path.abspath(os.path.dirname(__file__))
+    return os.path.join(test_directory, '..')
+```
+
+Then, as before, use that path to build filepaths in your tests.
+
+```python
+def test_some_file(project_directory):
+  some_file = os.path.join(project_directory, 'some_file.txt')
+```

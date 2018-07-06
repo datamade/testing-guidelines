@@ -154,7 +154,11 @@ If two or more fixtures that make up your cumulative fixtures are parameterized,
 
 ## Database fixtures
 
-Many of our web applications include databases. When they do, it’s important to test your SQL or ORM queries to ensure you’re accessing – or updating – the information you expect. To do that, we need to define a database fixture.
+Many of our web applications include databases. When they do, it’s important to test your SQL or ORM queries to ensure you’re accessing – or updating – the information you expect.
+
+**If you are writing a Django app,** you get much of the following for free. Head over to [`pytest 301`](/framework-specific-patterns.md) to learn more. If you're new to `pytest`, [don't miss the introduction to fixture scope](#scope-or-how-to-avoid-confusing-dependencies-between-your-tests) below.
+
+**For roll-your-own database testing (i.e., you're using Flask),** we need to define database fixtures manually.
 
 First, define a test database connection string in `test_config.py`.
 
@@ -166,9 +170,6 @@ DB_OPTS = {
     password=’’,
     port=5432,
 }
-
-DB_FMT = 'postgresql+dedupe://{username}:{password}@{host}:{port}/{database}'
-DB_CONN = DB_FMT.format(**DB_OPTS)
 ```
 
 `pytest_postgresql` is a `pytest` extension that provides convenience methods for creating and dropping your test database.
@@ -187,18 +188,17 @@ Then, import the convenience methods, `init_postgresql_database` and `drop_postg
 
 ```python
 from pytest_postgresql.factories import init_postgresql_database, drop_postgresql_database
-from .test_config import DB_OPTS, DB_CONN
+from .test_config import DB_OPTS
 
 @pytest.fixture(scope='session')
 def database(request):
-    pg_host = DB_OPTS.get("host")
-    pg_port = DB_OPTS.get("port")
-    pg_user = DB_OPTS.get("username")
+    pg_host = DB_OPTS["host"]
+    pg_port = DB_OPTS["port"]
+    pg_user = DB_OPTS["username"]
     pg_db = DB_OPTS["database"]
+
     init_postgresql_database(pg_user, pg_host, pg_port, pg_db)
 ```
-
-DataMaders: If you need to add extensions to your test database, see [the `database` fixture in `dedupe-service`](https://github.com/datamade/dedupe-service/blob/master/tests/conftest.py).
 
 ### Scope, or How to avoid confusing dependencies between your tests
 
@@ -208,11 +208,11 @@ Notice the scope keyword argument in the `fixture` decorator above. Scope determ
 * `module` – Fixture is run once per test module
 * `function` – Fixture is run every time a test includes it
 
-**Fixtures are function-scoped by default.** You should use this default unless you have a compelling reason. For example, it would be silly to re-create a database for every test. It is appropriate to use the `session` scope for fixtures that establish context that you aren’t going to change over the course of your testing, such as creating a database, initializing an application, or inserting immutable dummy data.
+Fixtures are function-scoped by default. You should use this default unless you have a compelling reason. For example, it would be silly to re-create a database for every test. It is appropriate to use the `session` scope for fixtures that establish context that you aren’t going to change over the course of your testing, such as creating a database, initializing an application, or inserting _immutable_ dummy data.
 
 **Be cautious!** Changes made to broadly scoped fixtures persist for all other tests in that session or module. This can lead to confusing circumstances where you are unsure whether your test is failing or the fixture context you expect was changed by a previous test.
 
-To diagnose these unintended dependencies, run your tests in a random order with [`pytest-randomly`](https://pypi.python.org/pypi/pytest-randomly). Simply:
+To diagnose these unintended dependencies, you can run your tests in a random order with [`pytest-randomly`](https://pypi.python.org/pypi/pytest-randomly). Simply:
 
 ```bash
 pip install pytest-randomly
@@ -235,6 +235,8 @@ Using --randomly-seed=1510172112
 pytest --randomly-seed=1510172112
 ```
 
+#### Finalizers
+
 If you define a fixture that creates a table or inserts data that you intend to alter in your test, **use the `function` scope** and write a finalizer.
 
 A finalizer is a method, defined within a fixture and decorated with `@request.addfinalizer`, that is run when that fixture falls out of scope. In effect, finalizers should undo your fixture. If you insert data, remove the data; if you create a table, delete the table; and so on. Let's add a finalizer to our `database` fixture.
@@ -255,14 +257,103 @@ def database(request):
 
 If a more broadly scoped fixture is unavoidable, **clean up any changes** made to the fixture context at the end of every test that uses it.
 
-Even better, reconsider whether tests need alter the database at all. If you are testing a method that accepts the result of a query, do you need to create a table, populate it with dummy data, and query it just so you can run the test? Probably not! Read on for an introduction to testing with `mock`.
+Even better, reconsider whether tests need alter the database at all. If you are testing a method that accepts the result of a query, do you need to create a table, populate it with dummy data, and query it just so you can run the test? Probably not! Insert the query result into a fixture, and use the fixture to run your method directly.
+
+Working with more than one layer of state-dependent function calls? There's probably a way around it! Read on for an introduction to testing with `mock`.
 
 ## mock
 
-If a test must retrieve data from an API endpoint before processing that data, it is not a modular test. `mock` is a `unittest` submodule that allows you to remove external dependencies from your test suite by creating mocked versions of the methods or objects that rely on them.
-
-When a method or object is mocked, it is replaced by `Mock` object. This object records whether and how the patched method or object is called rather than executing the underlying code. To return to our example, you can mock your data retrieval method and test that it is called with the arguments you expect without ever touching the API.
-
-For more on `mock`, see [the quickstart](https://docs.python.org/3/library/unittest.mock.html#quick-guide) in the docs and [this excellent tutorial](https://www.toptal.com/python/an-introduction-to-mocking-in-python).
+`mock` is a `unittest` submodule that allows you to remove external dependencies from your test suite by coercing the methods that rely on them to return state _you_ control.
 
 At DataMade, we like [`pytest-mock`](https://github.com/pytest-dev/pytest-mock/), a `pytest` extension that exposes the `mock` API to your tests with the `mocker` fixture.
+
+Let's say you have a method that calls a method that queries your database and returns a result, then performs some operation on the returned result.
+
+**`foo.py`**
+```python
+def get_result():
+    # query the database and return result
+
+def do_a_thing():
+    results = get_result()
+
+    for result in results:
+        # do a thing
+```
+
+With `mock`, you can tell `get_result` to return a pre-determined list of things, instead of querying a database as written. This allows you to bypass the getting of the result (e.g., you don't need to create a database with a table to query) so you can focus on testing whether your operation does what you expect.
+
+**`test_foo.py`**
+```python
+def test_do_a_thing(mocker):
+    mocker.patch('foo.get_result', return_value=[1, 2, 3])
+
+    do_a_thing()
+
+    # does things on [1, 2, 3]
+
+    # test things were done as expected
+```
+
+If that's not tantalizing enough, you can also use `mock` to raise exceptions to test error handling, or simply turn off state-altering parts of your code that aren't relevant to the test at hand. Finally, `mock` keeps track of whether and how mocked methods are called, so you can test how your code is used (called _n_ times, or with this or that argument), without necessarily having to run it.
+
+For more on how to use `mock`, see [the quickstart](https://docs.python.org/3/library/unittest.mock.html#quick-guide) in the `mock` documention, as well as [this excellent tutorial](https://www.toptal.com/python/an-introduction-to-mocking-in-python). Meanwhile, here are a few of our own hard-won lessons from early `mock` use.
+
+#### Mock methods where they're used, not defined.
+
+Returning to our example, let's say our code were instead organized like so:
+
+**`utils.py`**
+```python
+def get_result():
+    # query the database and return result
+```
+
+**`tasks.py`**
+```python
+from utils import get_result
+
+def do_a_thing():
+    results = get_result()
+
+    for result in results:
+        # do a thing
+```
+
+If we want to mock `get_result` in a test, we must patch it in the `tasks` module, where it's used, not where it's defined:
+
+**`test_tasks.py`**
+```python
+def test_do_a_thing(mocker):
+    mocker.patch('tasks.get_result', return_value=[1, 2, 3])
+
+    do_a_thing()
+
+    # does things on [1, 2, 3]
+
+    # test things were done as expected
+```
+
+#### Mocking classes is unconventional, but not impossible.
+
+Per [the `mock` documentation](https://docs.python.org/3/library/unittest.mock.html#unittest.mock.patch):
+
+> Patching a class replaces the class with a MagicMock instance. If the class is instantiated in the code under test then it will be the return_value of the mock that will be used.
+
+This means you first need to create a `MagicMock` instance "spec'ed" to the class you are mocking, with any methods you need to override (i.e., to return a value or raise an Exception), overridden.
+
+```python
+mocked_class = MagicMock(spec=CLASS_YOU_ARE_MOCKING)
+
+mocked_class.this_method.side_effect = AttributeError
+mocked_class.that_method.return_value = 'nyan nyan nyan'
+```
+
+<sup>**Note:** Spec'ing means your mock object shares attributes and methods with your class. If you try to access an attribute or call a method incorrectly, i.e., without positional arguments, on a spec'ed mock object, it will raise an exception. This is in contrast to an unspec'ed mock object, which will let  you access any attribute or call any function you want without complaint. Spec'ing ensures your tests align with the API in your code base and stay in line as it changes (because your mock objects will break if they fall out of date).</sup>
+
+Then, you need to patch the class you'd like to mock, and set its `return_value` to the `MagicMock` we just made.
+
+```python
+mock_handle = mock.patch('path.to.CLASS_YOU_ARE_MOCKING')
+mock_handle.return_value = mocked_class
+```
