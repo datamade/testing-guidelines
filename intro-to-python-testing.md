@@ -33,7 +33,7 @@ Within the tests directory, add the following files:
 
 * **`test_config.py`**
 
-  A configuration file that contains essential environment variables, i.e., INSTALLED_APPS, DATABASES, etc. (Careful! Do not put any secret data in here.)
+  A configuration file that contains essential environment variables, i.e., INSTALLED_APPS, DATABASES, etc. (Careful! Do not put any secret data in here.) Read more about what goes in this file in the [Django set-up section](/framework-specific-patterns.md#setup). 
 
 * **`conftest.py`**
 
@@ -61,11 +61,7 @@ Many DataMade projects use flake8 to enforce consistent and standard style patte
 
 At the top of your `setup.cfg` file, add a section for pytest: this tells your application to assign testing options (as they would appear in `pytest.ini`, i.e., the initialization file for `pytest`).
 
-<<<<<<< HEAD
 Then, add parameters for testing setup. The below example, taken from [Dedupe service](https://github.com/datamade/dedupe-service/blob/master/setup.cfg), includes precise options for flake8 + pytest integration. 
-=======
-Then, add parameters for testing setup. The below example, take from [Dedupe service](https://github.com/datamade/dedupe-service/blob/master/setup.cfg), includes precise options for flake8 + pytest integration.
->>>>>>> master
 
 ```cfg
 [tool:pytest]
