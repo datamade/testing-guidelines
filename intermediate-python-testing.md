@@ -299,7 +299,7 @@ def test_do_a_thing(mocker):
 
 Tantalizing, right? 
 
-You can also use `mock` to raise exceptions to test error handling, simply turn off state-altering parts of your code that aren't relevant to the test at hand, or return a response with JSON data (as we do with [MagicMock when in Metro](https://github.com/datamade/la-metro-councilmatic/blob/master/tests/test_events.py#L117)). Finally, `mock` keeps track of whether and how mocked methods are called, so you can test how your code is used (called _n_ times, or with this or that argument), without necessarily having to run it.
+You can also use `mock` to raise exceptions to test error handling, simply turn off state-altering parts of your code that aren't relevant to the test at hand, or return a response with JSON data (as we do with [MagicMock in Metro](https://github.com/datamade/la-metro-councilmatic/blob/master/tests/test_events.py#L117)). Finally, `mock` keeps track of whether and how mocked methods are called, so you can test how your code is used (called _n_ times, or with this or that argument), without necessarily having to run it.
 
 For more on how to use `mock`, see [the quickstart](https://docs.python.org/3/library/unittest.mock.html#quick-guide) in the `mock` documention, as well as [this excellent tutorial](https://www.toptal.com/python/an-introduction-to-mocking-in-python). Meanwhile, here are a few of our own hard-won lessons from early `mock` use.
 
