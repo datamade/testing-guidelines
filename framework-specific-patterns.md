@@ -150,7 +150,7 @@ STATICFILES_DIRS = (
 )
 ```
 
-Then, tell Django where to find it in `setup.cfg`:
+Then, tell Django where to find it in [`setup.cfg`](/intro-to-python-testing.md#configure-pytest-and-coordinate-additional-utilities):
 
 **`setup.cfg`**
 ```
@@ -160,11 +160,11 @@ DJANGO_SETTINGS_MODULE = tests.test_config
 
 ### Interacting with the database
 
-`pytest-django` handles the work of creating and tearing down your database, for you. (By default, it's called `test_` plus the name of the database you defined in `test_config.py`)
+`pytest-django` handles the work of creating and tearing down your test database, for you. (By default, it's called `test_` plus the name of the database you defined in `test_config.py`)
 
 However, `pytest-django` also treats the database as lava: Your tests will fail if they try to interact with it. This is great if you agree that the database is lava. At DataMade, we aren't so sure.
 
-To grant a test access to your database, use the `django_db` mark.
+To grant a test access to your database, [use the `django_db` mark](https://pytest-django.readthedocs.io/en/latest/helpers.html#pytest-mark-django-db-transaction-false-request-database-access).
 
 ```python
 import pytest

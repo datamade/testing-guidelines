@@ -62,13 +62,15 @@ tests/test_blah.py::test_addition PASSED
 
 Success!
 
-Note: You may create additional `conftest.py` files with special fixtures in your topical subdirectories. Test modules within the subdirectory will then have access to both global and special fixtures. This a great way to stay organized in complex testing situations.
+<sup>**Note:** You may create additional `conftest.py` files with special fixtures in your topical subdirectories. Test modules within the subdirectory will then have access to both global and special fixtures. This a great way to stay organized in complex testing situations.</sup>
 
 ## Parameterizing fixtures
 
 Behavior-driven development hinges on the question, "How should my code behave, given a certain context?" In our math example, we only test one context: summing two positive integers. What if one or both integers is negative? What if they’re floats? What if they’re not numbers at all? 
 
-Lucky for us, the `pytest` framework can test multiple contexts with one fixture – testing sugar, known as parameterized fixtures. To parameterize your fixture, first create an iterable containing your test cases. Then, pass your iterable to the `params` keyword argument of the `fixture` decorator. Tests that include your fixture will now run once for every parameter.
+Lucky for us, the `pytest` framework can test multiple contexts with one fixture – testing sugar, known as parameterized fixtures. To parameterize your fixture, first create an iterable containing your test cases. Then, pass your iterable to the `params` keyword argument of the `fixture` decorator. Tests that include your fixture will now run once for every parameter. 
+
+<sup>**Note:** the below example uses [`pytest.raises` as a context manager](https://docs.pytest.org/en/latest/assert.html#assertions-about-expected-exceptions) to test the `TypeError` exception.</sup>
 
 **`conftest.py`**
 
@@ -137,7 +139,7 @@ tests/test_blah.py::test_addition[numbers5] PASSED
 
 Success times 6!
 
-Note: You can write cumulative fixtures by defining one fixture, then defining another fixture that includes (accepts as an argument) the first one.
+<sup>**Note:** You can write cumulative fixtures by defining one fixture, then defining another fixture that includes (accepts as an argument) the first one.</sup>
 
 ```python
 @pytest.fixture
@@ -295,7 +297,9 @@ def test_do_a_thing(mocker):
     # test things were done as expected
 ```
 
-If that's not tantalizing enough, you can also use `mock` to raise exceptions to test error handling, or simply turn off state-altering parts of your code that aren't relevant to the test at hand. Finally, `mock` keeps track of whether and how mocked methods are called, so you can test how your code is used (called _n_ times, or with this or that argument), without necessarily having to run it.
+Tantalizing, right? 
+
+You can also use `mock` to raise exceptions to test error handling, return canned website responses without hitting a live endpoint (as we do [in Metro](https://github.com/datamade/la-metro-councilmatic/blob/master/tests/test_events.py#L117)), or simply turn off state-altering parts of your code that aren't relevant to the test at hand. Finally, `mock` keeps track of whether and how mocked methods are called, so you can test how your code is used (called _n_ times, or with this or that argument), without necessarily having to run it.
 
 For more on how to use `mock`, see [the quickstart](https://docs.python.org/3/library/unittest.mock.html#quick-guide) in the `mock` documention, as well as [this excellent tutorial](https://www.toptal.com/python/an-introduction-to-mocking-in-python). Meanwhile, here are a few of our own hard-won lessons from early `mock` use.
 
