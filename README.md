@@ -73,7 +73,7 @@ In the event that a test fails, unless the functionality of the method has mater
 
 ### Django
 
-* [`django-councilmatic`](https://github.com/datamade/django-councilmatic/blob/master/councilmatic_core/tests.py) – test all endpoints in a Councilmatic instance are valid
+* [`django-councilmatic`](https://github.com/datamade/django-councilmatic/blob/master/tests/test_routes.py) – test all endpoints in a Councilmatic instance are valid
 * [`la-metro-councilmatic`](https://github.com/datamade/la-metro-councilmatic/tree/master/tests) - test assorted formatting and display behaviors in a custom Councilmatic instance
 * [`large-lots`](https://github.com/datamade/large-lots/tree/master/tests) - test a variety of functionality in a Django app, from form submission and validation, to distributed review tasks, to Django management commands
 
