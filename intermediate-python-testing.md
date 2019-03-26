@@ -361,3 +361,52 @@ Then, you need to patch the class you'd like to mock, and set its `return_value`
 mock_handle = mock.patch('path.to.CLASS_YOU_ARE_MOCKING')
 mock_handle.return_value = mocked_class
 ```
+
+#### `requests-mock`
+
+Sometimes, your app sends requests to external URIs. And sometimes, these requests either have very little to do with the needs of your tests or fully interfere with them. [`requests-mock`](https://requests-mock.readthedocs.io/en/latest/overview.html) comes to the rescue!
+
+Let's return to our example, but build out some of its functionality.
+
+**`scraper.py`**
+```python
+def get_result():
+    # query the database and return result
+
+def scrape_an_endpoint(endpoint):
+    # get data from https://api.com/v1/{endpoint}
+
+def scrape_another_endpoint(endpoint):
+    # get data from https://api.com/v1/{endpoint}
+```
+
+**`tasks.py`**
+```python
+from utils import get_result
+
+def do_a_thing():
+    results = get_result()
+
+    for result in results:
+        # do a thing 
+        data = scrape_an_endpoint(result.id)
+        more_data = scrape_an_endpoint(result.id)
+```
+
+We can mock `get_result` in a test, as described above. However, `do_a_thing` still makes actual calls to an external, possibly unstable API. Such data could likely interfere with the predictability of `test_do_a_thing`. We have two options: (1) mock the results of the `scrape` functions, or (2) mock the requests to `https://api.com/v1`. The former can be tedious, particularly if you need to mock loads of utility functions. The latter option, instead, requires minimal effort with `requests-mock`:
+
+**`test_tasks.py`**
+```python
+def test_do_a_thing(mocker):
+    with requests_mock.Mocker() as m:
+        matcher = re.compile('api.com')
+        m.get(matcher, json={}, status_code=200)
+
+        mocker.patch('tasks.get_result', return_value=[1, 2, 3])
+
+        do_a_thing()
+
+        # does things on [1, 2, 3]
+
+        # test things were done as expected
+```
