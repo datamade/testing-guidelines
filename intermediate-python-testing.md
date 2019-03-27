@@ -5,6 +5,7 @@
 * [Database fixtures](#database-fixtures)
   * [Scope, or How to avoid confusing dependencies between your tests](#scope-or-how-to-avoid-confusing-dependencies-between-your-tests)
 * [mock](#mock)
+* [requests-mock](#requests-mock)
 
 ## Fixtures
 
@@ -361,3 +362,74 @@ Then, you need to patch the class you'd like to mock, and set its `return_value`
 mock_handle = mock.patch('path.to.CLASS_YOU_ARE_MOCKING')
 mock_handle.return_value = mocked_class
 ```
+
+## requests-mock
+
+Sometimes, your app sends requests to external URIs. And sometimes, these requests either have very little to do with the needs of your tests or fully interfere with them. And all the times, sending requests to external URIs violates the principle of [test isolation](https://www.obeythetestinggoat.com/book/chapter_purist_unit_tests.html). Thankfully, [`requests-mock`](https://requests-mock.readthedocs.io/en/latest/overview.html) leaps into action!
+
+`requests-mock` sets up [a transport adapter](http://docs.python-requests.org/en/latest/user/advanced/#transport-adapters) (a mechanism which defines how to handle HTTP requests). With a `requests-mock` adapter, requests to the specified URIs are automatically patched, giving you control of the data they return. How to use it? `requests-mock` comes with [multiple patterns for instantiating the `requests_mock.Mocker` class](https://requests-mock.readthedocs.io/en/latest/mocker.html#activation). For instance, use it as a context manager:
+
+```python
+import requests
+import requests_mock
+
+def test_get_resp():
+    with requests_mock.Mocker() as m:
+        m.get("http://propane.org", text="that boy ain't right")
+        rsp = requests.get("http://propane.org").text
+
+        assert rsp.text == "that boy ain't right"
+``` 
+
+Your app might hit variations of the same URI, such as different endpoints of an API. `requests-mock` saves you the tedium of mocking each path. You can define an adaptor that matches multiple paths, [e.g., with Regex](https://requests-mock.readthedocs.io/en/latest/matching.html#regular-expressions). Let's return to the example above, but build out some of its functionality.
+
+**`utils.py`**
+```python
+def get_result():
+    # query the database and return result
+
+def scrape_an_endpoint(result_id):
+    # get data from https://api.com/v1/endpoint/{result_id}
+
+def scrape_another_endpoint(result_id):
+    # get data from https://api.com/v1/another_endpoint/{result_id}
+```
+
+**`tasks.py`**
+```python
+from utils import get_result
+
+def do_a_thing():
+    results = get_result()
+
+    for result in results:
+        # get data and do a thing 
+        data = scrape_an_endpoint(result.id)
+        more_data = scrape_an_endpoint(result.id)
+```
+
+We can mock `get_result` in a test, as described above. However, `do_a_thing` now makes actual calls to an external, possibly unstable API. Such data could likely interfere with the predictability of `test_do_a_thing`. We have two options: (1) mock the results of every `scrape_an_endpoint` and `scrape_another_endpoint`, or (2) mock the requests to `https://api.com/v1`. The former can be tedious, particularly if you need to mock loads of utility functions. The latter option, happily, requires minimal effort with `requests-mock`:
+
+**`test_tasks.py`**
+```python
+import pytest
+import requests_mock
+
+def test_do_a_thing(mocker):
+    with requests_mock.Mocker() as m:
+        # here, we tell the requests-mock adaptor to match
+        # any URL with "api.com/v1," i.e., different endpoints,
+        # https and http, query params, etc.
+        matcher = re.compile('api.com/v1')
+        m.get(matcher, json={}, status_code=200)
+
+        mocker.patch('tasks.get_result', return_value=[1, 2, 3])
+
+        do_a_thing()
+
+        # does things on [1, 2, 3]
+
+        # test things were done as expected
+```
+
+Need more? Check out [the tests for `scrapers-us-municipal`](https://github.com/datamade/scrapers-us-municipal/blob/master/tests/lametro), which makes healthy use of `requests-mock`.
