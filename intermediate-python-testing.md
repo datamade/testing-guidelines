@@ -381,7 +381,7 @@ def test_get_resp():
         assert rsp.text == "that boy ain't right"
 ``` 
 
-Your app might hit variations of the same URI, however. `requests-mock` saves you the tedium of mocking each path. You can define an adaptor that matches multiple paths, [e.g., with Regex](https://requests-mock.readthedocs.io/en/latest/matching.html#regular-expressions). Let's return to the example above, but build out some of its functionality.
+Your app might hit variations of the same URI, such as different endpoints of an API. `requests-mock` saves you the tedium of mocking each path. You can define an adaptor that matches multiple paths, [e.g., with Regex](https://requests-mock.readthedocs.io/en/latest/matching.html#regular-expressions). Let's return to the example above, but build out some of its functionality.
 
 **`utils.py`**
 ```python
