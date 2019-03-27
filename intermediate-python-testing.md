@@ -365,7 +365,7 @@ mock_handle.return_value = mocked_class
 
 ## requests-mock
 
-Sometimes, your app sends requests to external URIs. And sometimes, these requests either have very little to do with the needs of your tests or fully interfere with them. [`requests-mock`](https://requests-mock.readthedocs.io/en/latest/overview.html) leaps into action!
+Sometimes, your app sends requests to external URIs. And sometimes, these requests either have very little to do with the needs of your tests or fully interfere with them. And all the times, sending requests to external URIs violates the principle of [test isolation](https://www.obeythetestinggoat.com/book/chapter_purist_unit_tests.html). Thankfully, [`requests-mock`](https://requests-mock.readthedocs.io/en/latest/overview.html) leaps into action!
 
 `requests-mock` sets up [a transport adapter](http://docs.python-requests.org/en/latest/user/advanced/#transport-adapters) (a mechanism which defines how to handle HTTP requests). With a `requests-mock` adapter, you can load data into responses from specified URIs. How to use it? `requests-mock` comes with [multiple patterns for instantiating the `requests_mock.Mocker` class](https://requests-mock.readthedocs.io/en/latest/mocker.html#activation). For instance, use it as a context manager:
 
