@@ -369,7 +369,7 @@ Sometimes, your app sends requests to external URIs. And sometimes, these reques
 
 `requests-mock` sets up [a transport adapter](http://docs.python-requests.org/en/latest/user/advanced/#transport-adapters) (a mechanism which defines how to handle HTTP requests). With a `requests-mock` adapter, requests to the specified URIs are automatically patched, giving you control of the data they return. How to use it? `requests-mock` comes with [multiple patterns for instantiating the `requests_mock.Mocker` class](https://requests-mock.readthedocs.io/en/latest/mocker.html#activation). For instance, use it as a context manager:
 
-```
+```python
 import requests
 import requests_mock
 
