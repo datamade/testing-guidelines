@@ -388,11 +388,11 @@ Your app might hit variations of the same URI, such as different endpoints of an
 def get_result():
     # query the database and return result
 
-def scrape_an_endpoint(endpoint):
-    # get data from https://api.com/v1/{endpoint}
+def scrape_an_endpoint(result_id):
+    # get data from https://api.com/v1/endpoint/{result_id}
 
-def scrape_another_endpoint(endpoint):
-    # get data from https://api.com/v1/{endpoint}
+def scrape_another_endpoint(result_id):
+    # get data from https://api.com/v1/another_endpoint/{result_id}
 ```
 
 **`tasks.py`**
