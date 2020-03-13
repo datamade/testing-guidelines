@@ -363,6 +363,29 @@ mock_handle = mock.patch('path.to.CLASS_YOU_ARE_MOCKING')
 mock_handle.return_value = mocked_class
 ```
 
+#### `patch()` ####
+
+`patch()` is the main method that allows you to replace a dependency with a mock. There are two main ways to use this method -- as a decorator or as a context manager.
+
+As a decorator, `@patch()` can be used on a testing class or a single test function. The mock that it creates will live for the duration of the class or function. Once the test (or all the tests in the class, as the case may be) is complete, the mock is cleaned up and any other tests will use the real dependency instead of the mock.
+
+As a context manager, `patch()` allows your mock to be scoped to just part of a function.
+
+##### Useful mock object attributes #####
+
+Part of a mock object's magic is that it does not necessarily behave like the object it's patching. For example, any attribute you call on your mock pops into existence by virtue of being called, even if it doesn't exist on the real dependency. While this can be helpful at times, mock objects can be more useful if they throw errors, return values, and otherwise behave like the objects, functions, or other dependencies they temporarily replace. 
+
+Both the `patch()` method and the mock object itself have attributes that allow you to more closely mimic the behavior of the dependency you want to temporarily replace.
+
+`spec`, `auto_spec`, `set_spec` are mock object attributes that allow the mock that was created to have the same specifications (aka, attributes) as the original dependency.
+- `spec` only goes so far as to copy the attributes of the mocked object itself
+- `auto_spec` can copy the attributes of the mocked object’s attributes as well
+- `spec_set` makes sure you can’t make attributes that don’t already exist. That is, it limits your mock’s ability to be a blank in your code by confining the attributes your mock can have to be only attributes your mocked object already has
+
+A couple of other useful attributes are:
+- `return_value`, which gives your mock's attribute a value. Since mock objects do not necessarily mimic the original dependency, this can be very helpful
+`side_effect` allows you to make an attribute throw an error or, if you use a callable like a function or class, it returns the value of that callable
+
 ## requests-mock
 
 Sometimes, your app sends requests to external URIs. And sometimes, these requests either have very little to do with the needs of your tests or fully interfere with them. And all the times, sending requests to external URIs violates the principle of [test isolation](https://www.obeythetestinggoat.com/book/chapter_purist_unit_tests.html). Thankfully, [`requests-mock`](https://requests-mock.readthedocs.io/en/latest/overview.html) leaps into action!
