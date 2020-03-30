@@ -306,7 +306,7 @@ Tantalizing, right?
 
 #### `patch()`
 
-`patch()` is the main method that allows you to replace a dependency with a mock. There are two main ways to use this method -- as a decorator or as a context manager.
+[`patch()`](https://docs.python.org/3/library/unittest.mock.html#patch) is the main method that allows you to replace a dependency with a mock, which you can read more about in the [mock documentation](https://docs.python.org/3/library/unittest.mock.html). There are two main ways to use this method -- as a decorator or as a context manager. 
 
 As a decorator, `@patch()` can be used on a testing class or a single test function. The mock that it creates will live for the duration of the class or function. Once the test (or all the tests in the class, as the case may be) is complete, the mock is cleaned up and any other tests will use the real dependency instead of the mock. For example, as a class decorator:
 
@@ -335,6 +335,7 @@ class SomeClass:
 As a context manager, `patch()` allows your mock to be scoped to just part of a function, like this:
 ```python
 def first_test(self):
+    patched_dependency = patch('path.to.patched_dependency)
     patched_dependency.return_value = "this is what I expect"
     with patch('path.to.patched_dependency') as patched_dependency:
         # do the things in the first test using the mock
@@ -345,9 +346,9 @@ def first_test(self):
 
 Part of a mock object's magic is that it does not necessarily behave like the object it's patching. For example, any attribute you call on your mock pops into existence by virtue of being called, even if it doesn't exist on the real dependency. While this can be helpful at times, mock objects can be more useful if they throw errors, return values, and otherwise behave like the objects, functions, or other dependencies they temporarily replace. 
 
-You can pass certain arguments into the `patch()` method which allow you to set attributes on the mock object that allow you to more closely mimic the behavior of the dependency you want to temporarily replace.
+You can configure mocks to more closely mimic the behavior of the dependency you want to replace by passing a few simple arguments to the `patch()` method.
 
-`spec`, `auto_spec`, `set_spec` are arguments you can pass into `patch()` that allow the created mock to have the same attributes as the original dependency.
+`spec`, `auto_spec`, `set_spec` are arguments you can pass into `patch()` that allow the created mock to have the same attributes as the original dependency. Check out the [docs on `patch()`](https://docs.python.org/3/library/unittest.mock.html#patch) for more info about these arguments.
 - `spec` only goes so far as to copy the attributes of the mocked object itself. 
 - `autospec` can copy the attributes of the mocked object’s attributes as well
 - `spec_set` makes sure you can’t make attributes that don’t already exist. That is, it limits your mock’s ability to be a blank in your code by confining the attributes your mock can have to be only attributes your mocked object already has
@@ -363,11 +364,11 @@ The mock also has couple of other useful attributes:
 - `return_value`, which gives your mock's attribute a value. Since mock objects do not necessarily mimic the original dependency, this can be very helpful
 - `side_effect` allows you to make an attribute throw an error or, if you use a callable like a function or class, it returns the value of that callable
 
-#### Lessons learned
+### Lessons learned
 
 Here are a few of our own hard-won lessons from early mock use.
 
-##### Mock methods where they're used, not defined.
+#### Mock methods where they're used, not defined.
 
 Returning to our example, let's say our code were instead organized like so:
 
@@ -402,7 +403,7 @@ def test_do_a_thing(mocker):
     # test things were done as expected
 ```
 
-##### Mocking classes is unconventional, but not impossible.
+#### Mocking classes is unconventional, but not impossible.
 
 Per [the `mock` documentation](https://docs.python.org/3/library/unittest.mock.html#unittest.mock.patch):
 
@@ -426,7 +427,7 @@ mock_handle = mock.patch('path.to.CLASS_YOU_ARE_MOCKING')
 mock_handle.return_value = mocked_class
 ```
 
-#### Next steps
+### Next steps
 
 You can also use `mock` to raise exceptions to test error handling, return canned website responses without hitting a live endpoint (as we do [in Metro](https://github.com/datamade/la-metro-councilmatic/blob/master/tests/test_events.py#L117)), or simply turn off state-altering parts of your code that aren't relevant to the test at hand. Finally, `mock` keeps track of whether and how mocked methods are called, so you can test how your code is used (called _n_ times, or with this or that argument), without necessarily having to run it.
 
