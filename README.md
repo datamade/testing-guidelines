@@ -25,7 +25,7 @@ Behavior-driven development (BDD) is based on an understanding of what should ha
 * Dynamically displayed user-interface
 * User interactions
 
-Note that compatibility and style are also elements of testing. If a feature doesn’t work across environments and browsers, it doesn’t work. If the the code doesn’t adhere to agreed-upon style conventions, it isn’t merged. Use of `flake8` and `jshint` will get you well on your way to compatibility and style compliance.
+Note that compatibility and style are also elements of testing. If a feature doesn’t work across environments and browsers, it doesn’t work. If the the code doesn’t adhere to agreed-upon style conventions, it isn’t merged. Use of `flake8` and `ESLint` will get you well on your way to compatibility and style compliance.
 
 Also note that it is only necessary to test your own code because languages and libraries (ideally) have tests of their own. For instance, you don't need to test that `print('foo')` prints "foo". (Seriously, [it's covered](https://github.com/python/cpython/blob/6f0eb93183519024cb360162bdd81b9faec97ba6/Lib/test/test_print.py).) On the other hand, if you write a method that prints "foo" if certain conditions are met, you should test that your method prints "foo" provided those conditions are met and doesn't print "foo" otherwise.
 
@@ -66,7 +66,7 @@ In the event that a test fails, unless the functionality of the method has mater
     * Management commands
 * [Front-end testing](/intro-to-javascript-testing.md)
   * The right style
-  * Test your syntax with `jshint`
+  * Test your syntax with `ESLint`
   * Test your logic with `jasmine`
 
 ## Examples
